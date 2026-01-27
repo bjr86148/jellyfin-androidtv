@@ -18,40 +18,43 @@ import androidx.leanback.widget.VerticalGridView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.jellyfin.androidtv.databinding.HorizontalGridBinding;
+import org.jellyfin.androidtv.databinding.VerticalGridBinding;
 
 import timber.log.Timber;
 
 /**
  * A presenter that renders objects in a horizontal grid.
  */
-public class HorizontalGridPresenter extends Presenter {
+public class VerticalGridPresenter extends Presenter {
     public class ViewHolder extends Presenter.ViewHolder {
         final ItemBridgeAdapter mItemBridgeAdapter = new ItemBridgeAdapter();
-        final HorizontalGridView mGridView;
+        final VerticalGridView mGridView;
         boolean mInitialized;
 
-        public ViewHolder(HorizontalGridView view) {
+        public ViewHolder(VerticalGridView view) {
             super(view);
             mGridView = view;
         }
 
-        public HorizontalGridView getGridView() {
+        public VerticalGridView getGridView() {
             return mGridView;
         }
     }
 
     private int mNumRows = -1;
+
+    private int mNumCols = -1;
     private int mZoomFactor;
     private boolean mShadowEnabled = true;
     private OnItemViewSelectedListener mOnItemViewSelectedListener;
     private OnItemViewClickedListener mOnItemViewClickedListener;
     private boolean mRoundedCornersEnabled = true;
 
-    public HorizontalGridPresenter() {
+    public VerticalGridPresenter() {
         this(FocusHighlight.ZOOM_FACTOR_LARGE);
     }
 
-    public HorizontalGridPresenter(int zoomFactor) {
+    public VerticalGridPresenter(int zoomFactor) {
         mZoomFactor = zoomFactor;
     }
 
@@ -69,6 +72,20 @@ public class HorizontalGridPresenter extends Presenter {
         if (mNumRows != numRows) {
             mNumRows = numRows;
         }
+    }
+
+    public void setNumberOfColumns(int numCols) {
+        if (numCols < 0) {
+            throw new IllegalArgumentException("Invalid number of rows");
+        }
+        if (mNumRows != numCols) {
+            mNumRows = numCols;
+        }
+    }
+
+    public int getNumberOfColumns()
+    {
+        return mNumCols;
     }
 
     /**
@@ -148,8 +165,8 @@ public class HorizontalGridPresenter extends Presenter {
      * Subclass may override this to inflate a different layout.
      */
     protected ViewHolder createGridViewHolder(ViewGroup parent) {
-        HorizontalGridBinding binding = HorizontalGridBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false);
-        return new ViewHolder(binding.horizontalGrid);
+        VerticalGridBinding binding = VerticalGridBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false);
+        return new ViewHolder(binding.verticalGrid);
     }
 
     private ItemBridgeAdapter.Wrapper mWrapper = new ItemBridgeAdapter.Wrapper() {
@@ -175,11 +192,13 @@ public class HorizontalGridPresenter extends Presenter {
      * @param vh The ViewHolder to initialize for the vertical grid.
      */
     protected void initializeGridViewHolder(ViewHolder vh) {
-        if (mNumRows == -1) {
+        mNumCols = 0;
+        if (mNumCols == -1) {
             throw new IllegalStateException("Number of rows must be set");
         }
         Timber.d("mNumRows %s", mNumRows);
-        vh.getGridView().setNumRows(mNumRows);
+        //vh.getGridView().setNumRows(mNumRows);
+        vh.getGridView().setNumColumns(mNumCols);
         vh.mInitialized = true;
 
         vh.mItemBridgeAdapter.setWrapper(mWrapper);
